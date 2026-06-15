@@ -1,24 +1,21 @@
 import streamlit as st
 
 # ==========================================
-# 1. PAGE CONFIGURATION & THEME
+# 1. PAGE CONFIGURATION & THEME [cite: 5]
 # ==========================================
 st.set_page_config(
-    page_title="MiniStore | Premium E-Commerce Hub",
+    page_title="MiniStore | Premium E-Commerce Hub", [cite: 3, 6]
     page_icon="🛍️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom premium CSS injection for beautiful UI/UX
+# Custom premium CSS injection for beautiful UI/UX [cite: 11]
 st.markdown("""
     <style>
-    /* Global background adjustments and typography */
     .stApp {
         background-color: #F9FAFB;
     }
-    
-    /* Hero Title styling */
     .hero-title {
         font-size: 3rem;
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
@@ -32,20 +29,13 @@ st.markdown("""
         color: #4B5563;
         margin-bottom: 2.5rem;
     }
-    
-    /* Product Card grid items */
     .product-card {
         background-color: #FFFFFF;
         padding: 1.5rem;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         border: 1px solid #E5E7EB;
-        margin-bottom: 1rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        margin-bottom: 0.5rem;
     }
     .product-tag {
         font-size: 0.75rem;
@@ -57,20 +47,17 @@ st.markdown("""
         display: inline-block;
         margin-bottom: 1rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
     }
     .product-name {
         font-size: 1.3rem;
         font-weight: 700;
         color: #111827;
         margin-bottom: 0.5rem;
-        line-height: 1.2;
     }
     .product-description {
         color: #6B7280; 
         font-size: 0.9rem; 
         min-height: 65px;
-        line-height: 1.4;
         margin-bottom: 1rem;
     }
     .product-price-tag {
@@ -79,39 +66,12 @@ st.markdown("""
         color: #059669;
         margin-bottom: 0.5rem;
     }
-    
-    /* Floating support button styling anchored at the bottom-right corner */
-    .chat-anchor-container {
-        position: fixed;
-        bottom: 35px;
-        right: 35px;
-        z-index: 99999;
-    }
-    .floating-action-chat {
-        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-        color: #FFFFFF !important;
-        padding: 14px 28px;
-        border-radius: 50px;
-        text-decoration: none !important;
-        font-weight: 700;
-        font-size: 1rem;
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-    }
-    .floating-action-chat:hover {
-        transform: scale(1.05);
-        box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.5);
-    }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. SEED DATA (Realistic Store Catalog)
+# 2. SEED DATA (Realistic Store Catalog) [cite: 8]
 # ==========================================
-# 6 comprehensive, realistic products spanning categories with metadata[cite: 8].
 PRODUCTS = [
     {"id": 1, "name": "AeroStride Elite Shoes", "category": "Footwear", "price": 4999, "desc": "Lightweight engineered mesh upper paired with high-responsiveness nitrogen-infused foam."},
     {"id": 2, "name": "Titanium Chronograph", "category": "Accessories", "price": 12499, "desc": "Sleek, scratch-resistant pure titanium housing integrated with Japanese precision movement."},
@@ -121,17 +81,17 @@ PRODUCTS = [
     {"id": 6, "name": "FlexForm Ergonomic Mouse", "category": "Electronics", "price": 1799, "desc": "Hyper-accurate optical tracking matrix tailored inside a fatigue-reducing biological arch design."}
 ]
 
-# Initialize persistent session state for the cart data tracking
+# Initialize persistent session state for the cart data tracking [cite: 24]
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
 # ==========================================
-# 3. SIDEBAR (Categories & Cart Aggregator)
+# 3. SIDEBAR (Categories & Cart Aggregator) [cite: 10]
 # ==========================================
 st.sidebar.title("🎒 MiniStore Panel") [cite: 10]
 st.sidebar.markdown("---")
 
-# Dynamic Category Filter 
+# Dynamic Category Filter [cite: 10]
 st.sidebar.subheader("Filter Inventory")
 unique_categories = ["All Products"] + list(set(p["category"] for p in PRODUCTS))
 selected_category = st.sidebar.selectbox("Choose Category", unique_categories)
@@ -148,7 +108,6 @@ else:
         subtotal = prod_obj["price"] * quantity
         running_total += subtotal
         
-        # Display line item breakdown
         st.sidebar.markdown(f"**{prod_obj['name']}**")
         st.sidebar.markdown(f"*{quantity} × ₹{prod_obj['price']:,}* → **₹{subtotal:,}**")
     
@@ -157,27 +116,29 @@ else:
     
     if st.sidebar.button("Clear Cart Summary", use_container_width=True):
         st.session_state.cart = {}
-        st.rerun()
+        st.sidebar.success("Cart cleared!")
 
 # ==========================================
-# 4. MARKETPLACE PRESENTATION GRID
+# 4. MARKETPLACE PRESENTATION GRID [cite: 6, 7]
 # ==========================================
-# Header Sections [cite: 7]
-st.markdown('<div class="hero-title">MiniStore Showcase</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero-subtitle">Experience next-generation utility goods refined for peak day-to-day performance.</div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-title">MiniStore Showcase</div>', unsafe_allow_html=True) [cite: 3, 7]
+st.markdown('<div class="hero-subtitle">Experience next-generation utility goods refined for peak day-to-day performance.</div>', unsafe_allow_html=True) [cite: 7]
 
-st.markdown("### ✨ Curated Collection")
+# Quick access support link at the top level for rock-solid stability
+st.page_link("pages/1_Support_Chatbot.py", label="Need help? Chat with MiniStore AI Support Agent", icon="💬") [cite: 15, 19]
+st.markdown("---")
 
-# Apply dynamic catalog filtering based on category selection
+st.markdown("### ✨ Curated Collection") [cite: 7]
+
+# Apply dynamic catalog filtering based on category selection [cite: 10]
 visible_products = PRODUCTS if selected_category == "All Products" else [p for p in PRODUCTS if p["category"] == selected_category]
 
-# Establish a highly-responsive 3-column layout grid 
-product_columns = st.columns(3)
+# Establish a highly-responsive 3-column layout grid [cite: 9]
+product_columns = st.columns(3) [cite: 9]
 for i, item in enumerate(visible_products):
-    column_target = product_columns[i % 3] # Distributes cards cleanly across the columns
+    column_target = product_columns[i % 3] [cite: 9]
     
     with column_target:
-        # Markdown HTML Injection block representing stylized item frames [cite: 7]
         st.markdown(f"""
             <div class="product-card">
                 <span class="product-tag">{item['category']}</span>
@@ -185,23 +146,9 @@ for i, item in enumerate(visible_products):
                 <div class="product-description">{item['desc']}</div>
                 <div class="product-price-tag">₹{item['price']:,}</div>
             </div>
-        """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True) [cite: 7]
         
-        # Native Streamlit transactional button anchored beneath the raw CSS styling block
-        if st.button(f"🛒 Add Item to Cart", key=f"item_btn_{item['id']}", use_container_width=True):
+        # Native action handling without forcing explicit layout reruns
+        if st.button(f"🛒 Add Item", key=f"item_btn_{item['id']}", use_container_width=True):
             st.session_state.cart[item['id']] = st.session_state.cart.get(item['id'], 0) + 1
-            st.toast(f"Successfully added {item['name']} to your cart!", icon="✅")
-            st.rerun()
-
-# ==========================================
-# 5. FLOATING COMPONENT ROUTING ANCHOR
-# ==========================================
-# Inserts a floating action link pointing toward the sub-page within the folder hierarchy[cite: 20, 22].
-# Streamlit translates standard multi-page names down into standard low-case URL routes.
-st.markdown("""
-    <div class="chat-anchor-container">
-        <a href="/Support_Chatbot" target="_self" class="floating-action-chat">
-            💬 Launch Live Support
-        </a>
-    </div>
-""", unsafe_allow_html=True)
+            st.toast(f"Added {item['name']} to cart!", icon="✅")
