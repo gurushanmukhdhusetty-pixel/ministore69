@@ -1,0 +1,11 @@
+ministore_app/
+│
+├── .streamlit/
+│   └── secrets.toml          # Contains your private OpenAI API Key
+│
+├── pages/
+│   └── 1_Support_Chatbot.py  # AI Support Assistant Page
+│
+├── .gitignore                # Protects secrets from being committed
+├── app.py                    # Main E-Commerce Homepage
+└── requirements.txt          # Python application dependencies
