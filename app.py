@@ -1,7 +1,7 @@
 import streamlit as st
 
 # ==========================================
-# 1. PAGE CONFIGURATION & THEME
+# 1. GLOBAL PAGE CONFIGURATION & THEME
 # ==========================================
 st.set_page_config(
     page_title="MiniStore | Premium E-Commerce Hub",
@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom premium CSS injection for beautiful UI/UX
+# Custom premium UI/UX CSS styling injection
 st.markdown("""
     <style>
     .stApp {
@@ -27,7 +27,7 @@ st.markdown("""
     .hero-subtitle {
         font-size: 1.15rem;
         color: #4B5563;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
     }
     .product-card {
         background-color: #FFFFFF;
@@ -70,7 +70,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. SEED DATA (6 Realistic Products)
+# 2. SEED DATA (Store Catalog)
 # ==========================================
 PRODUCTS = [
     {"id": 1, "name": "AeroStride Elite Shoes", "category": "Footwear", "price": 4999, "desc": "Lightweight engineered mesh upper paired with high-responsiveness nitrogen-infused foam."},
@@ -81,16 +81,34 @@ PRODUCTS = [
     {"id": 6, "name": "FlexForm Ergonomic Mouse", "category": "Electronics", "price": 1799, "desc": "Hyper-accurate optical tracking matrix tailored inside a fatigue-reducing biological arch design."}
 ]
 
-# Initialize persistent session state for the cart data tracking
+# ==========================================
+# 3. INITIALIZE PERSISTENT SESSION STATES
+# ==========================================
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = [
+        {"role": "assistant", "content": "Hello! I am your rule-based MiniStore Support Desk. Ask me about our catalog items, delivery times, or return policies."}
+    ]
+
+# Setup a clean program state tracking tool to handle the floating support button logic natively
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = 0
+
+# Helper routine to programmatically adjust tab index navigation
+def switch_to_tab(tab_index):
+    st.session_state.active_tab = tab_index
+    st.rerun()
+
 # ==========================================
-# 3. SIDEBAR (Categories & Live Cart)
+# 4. SIDEBAR ELEMENTS (Filters & Live Cart Summary)
 # ==========================================
 st.sidebar.title("🎒 MiniStore Panel")
 st.sidebar.markdown("---")
 
+# Dynamic Category Selector Filter
+st.sidebar.subheader("Filter Inventory")
 unique_categories = ["All Products"] + list(set(p["category"] for p in PRODUCTS))
 selected_category = st.sidebar.selectbox("Choose Category", unique_categories)
 
@@ -114,43 +132,99 @@ else:
     
     if st.sidebar.button("Clear Cart Summary", use_container_width=True):
         st.session_state.cart = {}
-        st.sidebar.success("Cart cleared!")
+        st.rerun()
 
 # ==========================================
-# 4. MARKETPLACE PRESENTATION GRID
+# 5. NAVIGATION SPACE VIEWPORTS
 # ==========================================
-st.markdown('<div class="hero-title">MiniStore Showcase</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero-subtitle">Experience next-generation utility goods refined for peak day-to-day performance.</div>', unsafe_allow_html=True)
+# Build the native view page structures using layout containers
+tab_marketplace, tab_support = st.tabs(["🛒 Product Marketplace", "💬 Live Support Center"])
 
-# SAFELY RENDER LINK: Prevents app crash if file tracking lags on Cloud startup
-try:
-    st.page_link("pages/1_Support_Chatbot.py", label="Need help? Chat with MiniStore AI Support Agent", icon="💬")
-except Exception:
-    # Fallback to pure string name if full absolute system paths mismatch on container load
-    try:
-        st.page_link("1_Support_Chatbot", label="Need help? Chat with MiniStore AI Support Agent", icon="💬")
-    except Exception:
-        st.warning("⚠️ Support system is syncing online. Please check that 'pages/1_Support_Chatbot.py' exists in your git branch.")
-
-st.markdown("---")
-st.markdown("### ✨ Curated Collection")
-
-visible_products = PRODUCTS if selected_category == "All Products" else [p for p in PRODUCTS if p["category"] == selected_category]
-
-product_columns = st.columns(3)
-for i, item in enumerate(visible_products):
-    column_target = product_columns[i % 3]
+# ------------------------------------------
+# TAB VIEW A: PRODUCT SHOWCASE
+# ------------------------------------------
+with tab_marketplace:
+    st.markdown('<div class="hero-title">MiniStore Showcase</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-subtitle">Experience next-generation utility goods refined for peak day-to-day performance.</div>', unsafe_allow_html=True)
     
-    with column_target:
-        st.markdown(f"""
-            <div class="product-card">
-                <span class="product-tag">{item['category']}</span>
-                <div class="product-name">{item['name']}</div>
-                <div class="product-description">{item['desc']}</div>
-                <div class="product-price-tag">₹{item['price']:,}</div>
-            </div>
-        """, unsafe_allow_html=True)
+    st.markdown("### ✨ Curated Collection")
+    
+    # Filter display output data matrix
+    visible_products = PRODUCTS if selected_category == "All Products" else [p for p in PRODUCTS if p["category"] == selected_category]
+    
+    # Establish responsive 3-column layout grid
+    product_columns = st.columns(3)
+    for i, item in enumerate(visible_products):
+        column_target = product_columns[i % 3]
         
-        if st.button(f"🛒 Add Item", key=f"item_btn_{item['id']}", use_container_width=True):
-            st.session_state.cart[item['id']] = st.session_state.cart.get(item['id'], 0) + 1
-            st.toast(f"Added {item['name']} to cart!", icon="✅")
+        with column_target:
+            st.markdown(f"""
+                <div class="product-card">
+                    <span class="product-tag">{item['category']}</span>
+                    <div class="product-name">{item['name']}</div>
+                    <div class="product-description">{item['desc']}</div>
+                    <div class="product-price-tag">₹{item['price']:,}</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(f"🛒 Add Item", key=f"item_btn_{item['id']}", use_container_width=True):
+                st.session_state.cart[item['id']] = st.session_state.cart.get(item['id'], 0) + 1
+                st.toast(f"Added {item['name']} to cart!", icon="✅")
+                st.rerun()
+
+# ------------------------------------------
+# TAB VIEW B: RULE-BASED SUPPORT AGENT
+# ------------------------------------------
+with tab_support:
+    st.title("💬 MiniStore Support Help Desk")
+    st.caption("Instant automated answers regarding our current catalog collection, shipping, adjustments, and order systems.")
+    st.markdown("---")
+    
+    # Rule-Based Pattern Classifier Logic Matrix
+    def get_rule_based_response(user_query: str) -> str:
+        query = user_query.lower().strip()
+        
+        if any(k in query for k in ["product", "item", "shoe", "watch", "headphone", "backpack", "lamp", "mouse", "catalog", "buy"]):
+            return (
+                "### MiniStore Official Inventory Catalog:\n\n"
+                "1. **AeroStride Elite Shoes** (Footwear) — ₹4,999\n"
+                "2. **Titanium Chronograph** (Accessories) — ₹12,499\n"
+                "3. **SonicPulse ANC Headphones** (Electronics) — ₹8,999\n"
+                "4. **HydroShield Commuter Bag** (Accessories) — ₹3,499\n"
+                "5. **LuminaGlow Smart Desk Lamp** (Electronics) — ₹2,199\n"
+                "6. **FlexForm Ergonomic Mouse** (Electronics) — ₹1,799\n\n"
+                "Which item can I help you find details for?"
+            )
+        elif any(k in query for k in ["delivery", "ship", "courier", "transit", "post", "days", "arrive"]):
+            return "🚚 **Delivery Policy:** All orders ship within 24–48 hours. Metro shipments arrive in 3-5 standard business days. Shipping is completely **free** on all orders over ₹2,000!"
+        elif "refund" in query:
+            return "💰 **Refund Framework:** Once your returned product passes our standard inspection check, refunds are credited back to your original payment source within 5–7 clearing business days."
+        elif any(k in query for k in ["return", "exchange", "replace", "wrong size"]):
+            return "🔄 **Returns Policy:** MiniStore operates a stress-free **14-day return and exchange policy**. Ensure tags remain attached and the item is in its original packaging container."
+        elif any(k in query for k in ["payment", "pay", "upi", "credit card", "cod", "cash on delivery", "netbanking"]):
+            return "💳 **Accepted Payments:** We support Visa, Mastercard, RuPay Cards, UPI gateways (GPay, PhonePe), NetBanking, and Cash on Delivery (COD) with no processing fees."
+        elif any(k in query for k in ["status", "track", "where is my order", "order number"]):
+            return "📍 **Tracking Status:** When your parcel leaves our logistics hubs, you receive an automated SMS with a tracking link to monitor your order live."
+        else:
+            return "👋 Welcome! I can assist you with **product details, delivery updates, refunds, returns, payment options, or order tracking**. Could you please specify your request?"
+
+    # Render previous conversation lines sequentially from history state arrays
+    for speech in st.session_state.chat_history:
+        with st.chat_message(speech["role"]):
+            st.markdown(speech["content"])
+
+    # Interactive User Prompt Capture
+    if input_prompt := st.chat_input("Type your support question here...", key="chat_input_unique"):
+        # Display the user's input
+        with st.chat_message("user"):
+            st.markdown(input_prompt)
+        st.session_state.chat_history.append({"role": "user", "content": input_prompt})
+        
+        # Calculate matching rule-based reply string
+        bot_reply = get_rule_based_response(input_prompt)
+        
+        # Display the automated agent's reply
+        with st.chat_message("assistant"):
+            st.markdown(bot_reply)
+        st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
+        st.rerun()
